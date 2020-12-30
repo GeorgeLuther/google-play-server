@@ -8,10 +8,9 @@ const store = require('./playstore.js')
 app.get('/app', (req, res) => {
     let list = store
     const { sort, genres } = req.query
-    console.log(`This is sort: ${(typeof sort)}`, sort)
     
     if (sort == '' || sort && !['rating','app'].includes(sort)) {
-        res.status(400).send('Sort must be defined as one of rating or app')
+        return res.status(400).send('Sort must be defined as one of rating or app')
     }
     if ('rating'.includes(sort)) {
         list.sort((a, b) => {
@@ -26,21 +25,22 @@ app.get('/app', (req, res) => {
         list.sort((a, b) => {
             if (a.App < b.App) {
                 return -1
-            } else if (b.App < a.Rating) {
+            } else if (b.App < a.App) {
                 return 1
             } else return 0
         })
     }
 
-    genres == '' || genres && !['Action','Puzzle','Casual','Arcade','Card'].includes(genres)
-    ? res.status(400).send('Genre must be defined as one of Action, Puzzle, Casual, Arcade, or Card')
-    : ['Action','Puzzle','Casual','Arcade','Card'].includes(genres) 
-    ? list.filter(app => app.Genres.includes(genres) ? app : null)
-    : null
+    if (genres == '' 
+    || genres && !['Action','Puzzle','Casual','Arcade','Card'].includes(genres)) {
+        return res.status(400).send('Genre must be defined as one of Action, Puzzle, Casual, Arcade, or Card')
+    }
+    if (['Action','Puzzle','Casual','Arcade','Card'].includes(genres)) {
+        console.log(genres)
+        list = list.filter(app => app.Genres.includes(genres))
+    }
 
-    res.json(list)
+    return res.json(list)
 })
 
-app.listen(8000, ()=> {
-    console.log('Started on Port 8000')
-})
+module.exports = app
